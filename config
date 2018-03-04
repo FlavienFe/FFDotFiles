@@ -11,9 +11,11 @@
 
 set $mod Mod4
 
+set $TERMINAL terminator
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
-font pango:System San Fransisco Display 12
+
+font pango:System San Fransisco Display 10
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
@@ -36,7 +38,7 @@ bindsym $mod+Return exec i3-sensible-terminal
 bindsym $mod+Shift+q kill
 
 # start dmenu (a program launcher)
-bindsym $mod+d exec rofi -show run
+bindsym $mod+d exec rofi -show drun -show-icons  
 # There also is the (new) i3-dmenu-desktop which only displays applications
 # shipping a .desktop file. It is a wrapper around dmenu, so you need that
 # installed.
@@ -142,10 +144,10 @@ mode "resize" {
         # Pressing right will grow the window’s width.
         # Pressing up will shrink the window’s height.
         # Pressing down will grow the window’s height.
-        bindsym j resize shrink width 10 px or 10 ppt
-        bindsym k resize grow height 10 px or 10 ppt
-        bindsym l resize shrink height 10 px or 10 ppt
-        bindsym semicolon resize grow width 10 px or 10 ppt
+        bindsym h resize shrink width 10 px or 10 ppt
+        bindsym j resize grow height 10 px or 10 ppt
+        bindsym k resize shrink height 10 px or 10 ppt
+        bindsym l resize grow width 10 px or 10 ppt
 
         # same bindings, but for the arrow keys
         bindsym Left resize shrink width 10 px or 10 ppt
@@ -175,8 +177,11 @@ client.urgent           $urgent-bg-color    $urgent-bg-color   $text-color      
 
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
+smart_gaps on
+gaps inner 15
 bar {
-        status_command i3blocks
+        status_command i3blocks -c ~/.config/i3/i3blocks.conf
+	font pango:System San Fransisco Display 14
 	colors {
 		background $bg-color
 	    	separator #757575
@@ -187,11 +192,31 @@ bar {
 	}
 }
 
+# startup settings 
+for_window [class="Terminator"] resize shrink width 30 px or 20 ppt, move container to $workspace2
+for_window [class="Firefox"] move container to $workspace1 
+for_window [class="Steam"] move container to $workspace4
+exec pacmd set-card-profile 1 a2dp_sink 
+
+#tablet araea
+exec xsetwacom --set "Wacom Intuos S Pen stylus" MapToOutput "1920x1080+0+0"
+exec xsetwacom --set "Wacom Intuos S Pen stylus" Area 5067 0 15200 5699
+
+#focus_follows_mouse no
 exec_always setxkbmap -option "caps:swapescape"
 exec xset r rate 300
 exec xrandr --output eDP-1-1 --mode 1920x1080
 exec_always xrandr --output DP-0 --mode 1920x1080 --pos 1920x0  --rate 144
-# Pulse Audio controls
+for_window [class="Thunar"] floating enable
+for_window [class="Firefox"] border none
+exec compton -f
+hide_edge_borders both
+#launchers
+exec --no-startup-id firefox
+exec --no-startup-id terminator
+
+# Pulse Audio controljs
+
 bindsym XF86AudioRaiseVolume exec --no-startup-id amixer -c 0 set PCM 5%+ #increase sound volume
 bindsym XF86AudioLowerVolume exec --no-startup-id  amixer -c 0 set PCM 5%- #decrease sound volume
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 0 toggle # mute sound
@@ -204,7 +229,13 @@ bindsym XF86MonBrightnessDown exec xbacklight -dec 20 # decrease screen brightne
 bindsym XF86TouchpadToggle exec /some/path/toggletouchpad.sh # toggle touchpad
 
 # Media player controls
+
 bindsym XF86AudioPlay exec playerctl play
 bindsym XF86AudioPause exec playerctl pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
+
+# Background
+
+exec_always --no-startup-id feh --bg-fill /home/dafy/Pictures/wallpaper.jpg
+
