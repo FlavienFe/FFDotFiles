@@ -9,17 +9,19 @@
 #
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
 
+title_align center
 #KEYBOARD-LAYOUT
-bindsym Mod1+Shift+f exec setxkbmap fr
-bindsym Mod1+Shift+u exec setxkbmap us
+exec_always "setxkbmap -layout us,fr,ru,it -variant altgr-intl,,, -option 'grp:alt_shift_toggle'"
 
+default_border pixel 1
+default_floating_border normal 7
 
 set $mod Mod4
 
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
 
-font pango:System San Fransisco Display 10
+font pango:System San Fransisco Display 9
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
@@ -36,18 +38,21 @@ font pango:System San Fransisco Display 10
 floating_modifier $mod
 
 # start a terminal
-bindsym $mod+Return exec i3-sensible-terminal
+bindsym $mod+Return exec termite
 
 # kill focused window
 bindsym $mod+Shift+q kill
 
 # switch between desktops with alt+tab
-bindsym Mod1+Tab workspace next
-bindsym Mod1+Shift+Tab workspace prev
+set $numb i3-msg -t get_workspaces | jq '.[] | select(.focused==true).num'+1 | cut -d"\"" -f2
+bindsym Mod1+Tab workspace prev
+bindsym Mod1+q  workspace next
+bindsym $mod+t $workspace$numb
 
+bindsym $mod+button3 floating toggle
 
 # start dmenu (a program launcher)
-bindsym $mod+d exec rofi -show drun -show-icons  
+bindsym $mod+d exec rofi -show drun -show-icons
 # There also is the (new) i3-dmenu-desktop which only displays applications
 # shipping a .desktop file. It is a wrapper around dmenu, so you need that
 # installed.
@@ -89,7 +94,7 @@ bindsym $mod+f fullscreen toggle
 # change container layout (stacked, tabbed, toggle split)
 bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
-bindsym $mod+e layout toggle split
+bindsym $mod+q layout toggle split
 
 # toggle tiling / floating
 bindsym $mod+Shift+space floating toggle
@@ -105,12 +110,12 @@ bindsym $mod+a focus parent
 
 set $workspace1 "1 "
 set $workspace2 "2 "
-set $workspace3 "3 "
-set $workspace4 "4 "
-set $workspace5 "5 "
-set $workspace6 "6 "
-set $workspace7 "7 "
-set $workspace8 "8 "
+set $workspace3 "3 "
+set $workspace4 "4 "
+set $workspace5 "5 "
+set $workspace6 "6 "
+set $workspace7 "7 "
+set $workspace8 "8 " 
 set $workspace9 "9 "
 set $workspace10 "10 "
 
@@ -171,8 +176,8 @@ mode "resize" {
 
 bindsym $mod+r mode "resize"
 
-set $bg-color 	         #2f343f
-set $inactive-bg-color   #2f343f
+set $bg-color 	         #3E4B4F
+set $inactive-bg-color   #22262E
 set $text-color          #f3f4f5
 set $inactive-text-color #676E7D
 set $urgent-bg-color     #E53935
@@ -187,27 +192,67 @@ client.urgent           $urgent-bg-color    $urgent-bg-color   $text-color      
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 smart_gaps on
-gaps inner 15
+gaps inner 8
 bar {
-        status_command i3blocks -c ~/.config/i3/i3blocks.conf
-	font pango:System San Fransisco Display 14
+    output eDP-1-1
+	tray_output eDP-1-1
+    status_command i3blocks -c ~/.config/i3blocks/config
+	font pango:System San Fransisco Display 11
+    height 28
 	colors {
 		background $bg-color
 	    	separator #757575
 		#                  border             background         text
-		focused_workspace  $bg-color          $bg-color          $text-color
-		inactive_workspace $inactive-bg-color $inactive-bg-color $inactive-text-color
+		focused_workspace  $inactive-bg-color   $inactive-bg-color          $text-color
+		inactive_workspace $bg-color        $bg-color $inactive-text-color
 		urgent_workspace   $urgent-bg-color   $urgent-bg-color   $text-color
 	}
 }
 
-# startup settings 
-for_window [class="Terminator"] resize shrink width 30 px or 20 ppt, move container to $workspace2
-for_window [window_role= "Browser"]  move container to $workspace1 
-for_window [class="Steam"] move container to $workspace4
-exec pacmd set-card-profile 1 a2dp_sink 
+bar {
+    output DP-0
+    tray_output DP-0
+    status_command i3blocks -c ~/.config/i3blocks/config
+	font pango:System San Fransisco Display 12
+    height 28
+    colors{
+		background $bg-color
+	    	separator #757575
+		#                  border             background         text
+		focused_workspace  $inactive-bg-color   $inactive-bg-color          $text-color
+		inactive_workspace $bg-color        $bg-color $inactive-text-color
+		urgent_workspace   $urgent-bg-color   $urgent-bg-color   $text-color
+}}
 
-#tablet araea
+# startup settings
+hide_edge_borders both
+
+for_window [class="Termite"] resize shrink width 15 px or 10 ppt,border pixel 2
+
+#assign [class="google-chrome"] $workspace1
+
+assign [class="Steam"] $workspace4
+
+assign [class="discord"] $workspace9
+
+assign [class="Kodi"] $workspace3
+
+assign [class="csgo_linux64"] $workspace5
+assign [class="hl2_linux"] $workspace5
+
+for_window [floating] border normal 1
+
+for_window [title="Picture in picture"] floating enable, border none
+
+exec pacmd set-card-profile 1 a2dp_sink
+
+#launchers
+exec nm-applet --no-agent
+exec --no-startup-id i3-msg 'workspace $workspace2;exec termite;exec termite;workspace $workspace1; exec google-chrome-stable'
+bindsym $mod+e exec nemo
+#automount usb drives
+exec --no-startup-id udiskie
+#tablet area
 exec xsetwacom --set "Wacom Intuos S Pen stylus" MapToOutput "1920x1080+0+0"
 exec xsetwacom --set "Wacom Intuos S Pen stylus" Area 5067 0 15200 5699
 
@@ -215,44 +260,46 @@ exec xsetwacom --set "Wacom Intuos S Pen stylus" Area 5067 0 15200 5699
 #exec_always setxkbmap -option "caps:swapescape"
 exec xset r rate 300
 exec xrandr --output eDP-1-1 --mode 1920x1080 --rate 120
+exec xrandr --dpi 128
 exec_always xrandr --output DP-0 --mode 1920x1080 --left-of eDP-1-1 --rate 144
-for_window [class="Thunar"] floating enable
+for_window [class="Nemo"] floating enable
 for_window [class="Chromium"] border none
-hide_edge_borders both
-#launchers
-exec --no-startup-id chromium
-exec --no-startup-id st
-
 # Pulse Audio controls
-
 bindsym XF86AudioRaiseVolume exec --no-startup-id amixer -c 0 set PCM 5%+ #increase sound volume
 bindsym XF86AudioLowerVolume exec --no-startup-id  amixer -c 0 set PCM 5%- #decrease sound volume
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 0 toggle # mute sound
 
 # Sreen brightness controls
-bindsym XF86MonBrightnessUp exec xbacklight -inc 20 # increase screen brightness
-bindsym XF86MonBrightnessDown exec xbacklight -dec 20 # decrease screen brightness
+#bindsym XF86MonBrightnessUp exec xbacklight -inc 20 # increase screen brightness
+#bindsym XF86MonBrightnessDown exec xbacklight -dec 20 # decrease screen brightness
+bindsym XF86MonBrightnessUp exec brillo -u 120000 -A 10
+bindsym XF86MonBrightnessDown exec brillo -u 120000 -U 10
 
 # Touchpad controls
-bindsym XF86TouchpadToggle exec /some/path/toggletouchpad.sh # toggle touchpad
+bindsym XF86TouchpadToggle exec ~/.config/ToggleTouchpad.sh # toggle touchpad
 
 # Media player controls
 
-bindsym XF86AudioPlay exec playerctl play
+bindsym XF86AudioPlay exec "playerctl play;cmus-remote -u"
 bindsym XF86AudioPause exec playerctl pause
-bindsym XF86AudioNext exec playerctl next
-bindsym XF86AudioPrev exec playerctl previous
+bindsym XF86AudioNext exec "playerctl next;cmus-remote -n"
+bindsym XF86AudioPrev exec "playerctl previous;cmus-remote -r"
 
 #screen control
+bindsym --release $mod+Print exec scrotpush
 #second monitor
-bindsym Mod1+F9 exec "xrandr --output DP-0 --mode 1920x1080 --rate 144 ; xrandr --output eDP-1-1 --off"
+bindsym Mod1+F9 exec "xrandr --output DP-0 --mode 1920x1080 --rate 144 --primary --panning 1920x1080+0+0; xrandr --output eDP-1-1 --off"
 #laptop monitor
 bindsym Mod1+F10 exec "xrandr --output eDP-1-1 --mode 1920x1080 --rate 120 ; xrandr --output DP-0 --off"
 
+bindsym Mod1+F8 exec "xrandr --output DP-0 --mode 1920x1080 --rate 144; xrandr --output eDP-1-1 --mode 1920x1080 --rate 120 --right-of DP-0"
 
+bindsym Mod1+F7 exec "xrandr --output eDP-1-1 --mode 1920x1080 --rate 60.01"
+
+bindsym Scroll_Lock exec "/home/dafy/.config/monitorswap.sh"
 # Background
 
-exec_always --no-startup-id feh --bg-fill /home/dafy/Pictures/wallpaper.jpg
-#exec compton -f --config ~/.config/compton.conf 
-#--blur-background-fixed
+exec_always --no-startup-id feh --bg-fill ~/.config/Wallpapers/wallpaper.jpg
+exec compton --config ~/.config/compton.conf --backend glx --vsync opengl --unredir-if-possible
 
+#test
