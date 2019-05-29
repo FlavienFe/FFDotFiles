@@ -8,10 +8,9 @@
 # i3 config file (v4)
 #
 # Please see https://i3wm.org/docs/userguide.html for a complete reference!
-
 title_align center
 #KEYBOARD-LAYOUT
-exec_always "setxkbmap -layout us,fr,ru,it -variant altgr-intl,,, -option 'grp:alt_shift_toggle'"
+exec_always "setxkbmap -layout us -variant altgr-intl"
 
 default_border pixel 1
 default_floating_border normal 7
@@ -45,9 +44,11 @@ bindsym $mod+Shift+q kill
 
 # switch between desktops with alt+tab
 set $numb i3-msg -t get_workspaces | jq '.[] | select(.focused==true).num'+1 | cut -d"\"" -f2
-bindsym Mod1+Tab workspace prev
-bindsym Mod1+q  workspace next
+bindsym Mod1+a workspace prev
+bindsym Mod1+s  workspace next
 bindsym $mod+t $workspace$numb
+bindsym Mod1+Control+a move container to workspace prev
+bindsym Mod1+Control+s move container to workspace next
 
 bindsym $mod+button3 floating toggle
 
@@ -55,8 +56,7 @@ bindsym $mod+button3 floating toggle
 bindsym $mod+d exec rofi -show drun -show-icons
 # There also is the (new) i3-dmenu-desktop which only displays applications
 # shipping a .desktop file. It is a wrapper around dmenu, so you need that
-# installed.
-# bindsym $mod+d exec --no-startup-id i3-dmenu-desktop
+# installe
 
 # change focus
 bindsym $mod+h focus left
@@ -193,36 +193,6 @@ client.urgent           $urgent-bg-color    $urgent-bg-color   $text-color      
 # finds out, if available)
 smart_gaps on
 gaps inner 8
-bar {
-    output eDP-1-1
-	tray_output eDP-1-1
-    status_command i3blocks -c ~/.config/i3blocks/config
-	font pango:System San Fransisco Display 11
-    height 28
-	colors {
-		background $bg-color
-	    	separator #757575
-		#                  border             background         text
-		focused_workspace  $inactive-bg-color   $inactive-bg-color          $text-color
-		inactive_workspace $bg-color        $bg-color $inactive-text-color
-		urgent_workspace   $urgent-bg-color   $urgent-bg-color   $text-color
-	}
-}
-
-bar {
-    output DP-0
-    tray_output DP-0
-    status_command i3blocks -c ~/.config/i3blocks/config
-	font pango:System San Fransisco Display 12
-    height 28
-    colors{
-		background $bg-color
-	    	separator #757575
-		#                  border             background         text
-		focused_workspace  $inactive-bg-color   $inactive-bg-color          $text-color
-		inactive_workspace $bg-color        $bg-color $inactive-text-color
-		urgent_workspace   $urgent-bg-color   $urgent-bg-color   $text-color
-}}
 
 # startup settings
 hide_edge_borders both
@@ -239,17 +209,32 @@ assign [class="Kodi"] $workspace3
 
 assign [class="csgo_linux64"] $workspace5
 assign [class="hl2_linux"] $workspace5
+assign [class="^steam_app_[0-9]"] $workspace5
 
 for_window [floating] border normal 1
 
 for_window [title="Picture in picture"] floating enable, border none
+# https://github.com/ValveSoftware/steam-for-linux/issues/1040
+for_window [class="^Steam$" title="^Friends List$"] floating enable
+for_window [class="^Steam$" title="Steam - News"] floating enable
+for_window [class="^Steam$" title=".* - Chat"] floating enable
+for_window [class="^Steam$" title="^Settings$"] floating enable
+for_window [class="^Steam$" title=".* - event started"] floating enable
+for_window [class="^Steam$" title=".* CD key"] floating enable
+for_window [class="^Steam$" title="^Steam - Self Updater$"] floating enable
+for_window [class="^Steam$" title="^Screenshot Uploader$"] floating enable
+for_window [class="^Steam$" title="^Steam Guard - Computer Authorization Required$"] floating enable
+for_window [title="^Steam Keyboard$"] floating enable
+for_window [class="^Pavucontrol$"] floating enable
+for_window [class="^Blueman-manager$"] floating enable
+for_window [class="dde-file-manager"] floating enable
 
 exec pacmd set-card-profile 1 a2dp_sink
 
 #launchers
 exec nm-applet --no-agent
 exec --no-startup-id i3-msg 'workspace $workspace2;exec termite;exec termite;workspace $workspace1; exec google-chrome-stable'
-bindsym $mod+e exec nemo
+bindsym $mod+e exec thunar
 #automount usb drives
 exec --no-startup-id udiskie
 #tablet area
@@ -259,15 +244,16 @@ exec xsetwacom --set "Wacom Intuos S Pen stylus" Area 5067 0 15200 5699
 #focus_follows_mouse no
 #exec_always setxkbmap -option "caps:swapescape"
 exec xset r rate 300
-exec xrandr --output eDP-1-1 --mode 1920x1080 --rate 120
+exec_always xrandr --output eDP-1-1 --mode 1920x1080 --rate 60
 exec xrandr --dpi 128
 exec_always xrandr --output DP-0 --mode 1920x1080 --left-of eDP-1-1 --rate 144
-for_window [class="Nemo"] floating enable
+for_window [class="Thunar"] floating enable
 for_window [class="Chromium"] border none
 # Pulse Audio controls
 bindsym XF86AudioRaiseVolume exec --no-startup-id amixer -c 0 set PCM 5%+ #increase sound volume
 bindsym XF86AudioLowerVolume exec --no-startup-id  amixer -c 0 set PCM 5%- #decrease sound volume
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 0 toggle # mute sound
+exec --no-startup-id blueman-applet
 
 # Sreen brightness controls
 #bindsym XF86MonBrightnessUp exec xbacklight -inc 20 # increase screen brightness
@@ -299,7 +285,11 @@ bindsym Mod1+F7 exec "xrandr --output eDP-1-1 --mode 1920x1080 --rate 60.01"
 bindsym Scroll_Lock exec "/home/dafy/.config/monitorswap.sh"
 # Background
 
-exec_always --no-startup-id feh --bg-fill ~/.config/Wallpapers/wallpaper.jpg
+exec_always --no-startup-id feh --bg-fill ~/.config/wallpapers/Lambo_Countach_pple.png
 exec compton --config ~/.config/compton.conf --backend glx --vsync opengl --unredir-if-possible
 
 #test
+#polybar
+#
+exec_always ~/launch
+exec "sleep 2; mpd"
